@@ -1,22 +1,20 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using UnityEditor;
 using UnityEngine;
-using UnityEditor;
 
 namespace AnimationCompressor
 {
     public class Window : EditorWindow
     {
-        private AnimationClip targetClip = null;
-
+        private Core core = null;
         private Option option = new Option();
+        private AnimationClip targetClip = null;
 
         private void OnGUI()
         {
             DrawOption();
             DrawButtons();
         }
-        
+
         private void DrawTargetClip()
         {
             targetClip = (AnimationClip)EditorGUILayout.ObjectField("Target AnimationClip", targetClip, typeof(AnimationClip), true);
@@ -29,7 +27,16 @@ namespace AnimationCompressor
 
         private void DrawButtons()
         {
+            if (GUILayout.Button("Compress", GUILayout.Height(50)))
+            {
+                if (targetClip == null)
+                    return;
 
+                if (core == null)
+                    core = new Core();
+
+                core.Compress(targetClip, option);
+            }
         }
     }
 }
