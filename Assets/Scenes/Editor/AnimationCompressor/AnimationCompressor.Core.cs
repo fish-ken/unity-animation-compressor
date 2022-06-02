@@ -5,6 +5,19 @@ using UnityEngine;
 
 namespace AnimationCompressor
 {
+    public class Option
+    {
+        /// <summary>
+        /// TODO : Improved accuracy for endpoints such as feet and hands
+        /// </summary>
+        public bool AccurateEndPointNode { get; set; } = false;
+
+        public void OnGUI()
+        {
+            AccurateEndPointNode = EditorGUILayout.Toggle(nameof(AccurateEndPointNode), AccurateEndPointNode);
+        }
+    }
+
     public class Core
     {
         // TODO : Something
@@ -17,12 +30,14 @@ namespace AnimationCompressor
             }
 
             var fileName = $"{clip.name}_Compressed";
-            var compressedClip = Object.Instantiate<AnimationClip>(clip);
+            
+            var copyClip = Object.Instantiate<AnimationClip>(clip);
 
-            var curves = AnimationUtility.GetAllCurves(clip);
 
+            var curves = AnimationUtility.GetCurveBindings(clip);
 
-            AssetDatabase.CreateAsset((Object)Object.Instantiate<AnimationClip>((M0)animClip), outputPath);
+            var outputPath = "";
+            AssetDatabase.CreateAsset((Object)copyClip, outputPath);
             AssetDatabase.SaveAssets();
             AssetDatabase.DeleteAsset(fileName);
 
