@@ -1,10 +1,14 @@
-﻿using UnityEditor;
+﻿using System;
+using UnityEditor;
 using UnityEngine;
 
 namespace AnimationCompressor
 {
     public class Core
     {
+        private Option option = null;
+        private readonly Type curveType = typeof(Transform);
+
         public void Compress(AnimationClip originClip, Option option)
         {
             if (originClip == null)
@@ -13,17 +17,25 @@ namespace AnimationCompressor
                 return;
             }
 
-            var fileName = $"{originClip.name}_Compressed";
+            this.option = option;
 
-            var copyClip = Object.Instantiate<AnimationClip>(originClip);
-
-            var curves = AnimationUtility.GetCurveBindings(originClip);
 
             var outputPath = GetOutputPath(originClip);
+            var curveBindings = AnimationUtility.GetCurveBindings(originClip);
+            var copyClip = UnityEngine.Object.Instantiate<AnimationClip>(originClip);
+            copyClip.ClearCurves();
+
+
+            foreach(var curveBinding in curveBindings)
+            {
+                //copyClip.
+                var curve = AnimationUtility.GetEditorCurve(originClip, curveBinding);
+                copyClip.SetCurve(curveBinding.path, curveType, curveBinding.propertyName, curve);
+            }
+
 
             AssetDatabase.CreateAsset(copyClip, outputPath);
             AssetDatabase.SaveAssets(); 
-            //AssetDatabase.DeleteAsset(fileName);
         }
 
         private string GetOutputPath(AnimationClip originClip)
@@ -31,10 +43,13 @@ namespace AnimationCompressor
             if (originClip == null)
                 return string.Empty;
 
-
             var originPath = AssetDatabase.GetAssetPath(originClip);
-            Debug.Log(originPath);
-            return originPath;
+            var outputPath = originPath.Replace($"{originClip.name}.anim", $"{originClip.name}_Compressed.anim");
+
+            if(option.Logging)
+                Debug.Log(outputPath);
+
+            return outputPath;
         }
     }
 }
