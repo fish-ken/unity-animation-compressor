@@ -11,6 +11,7 @@ namespace AnimationCompressor
 
         private void OnGUI()
         {
+            DrawTargetClip();
             DrawOption();
             DrawButtons();
         }

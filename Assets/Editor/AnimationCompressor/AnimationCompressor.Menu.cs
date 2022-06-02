@@ -4,8 +4,8 @@ namespace AnimationCompressor
 {
     public class Menu
     {
-        [MenuItem("Assets/Optimization/Animation/Animation Compressor/Open")]
-        private static void OpenMaterialRefCleaner()
+        [MenuItem("Tools/Optimization/Animation/Animation Compressor/Open")]
+        public static void OpenMaterialRefCleaner()
         {
             ShowWindow();
         }
