@@ -110,13 +110,13 @@ namespace AnimationCompressor
                 case "m_LocalRotation.y":
                 case "m_LocalRotation.z":
                 case "m_LocalRotation.w":
-                    return option.PositionAllowError;
+                    return option.RotationAllowError;
 
                 case "m_LocalScale":
                 case "m_LocalScale.y":
                 case "m_LocalScale.z":
                 case "m_LocalScale.x":
-                    return option.PositionAllowError;
+                    return option.ScaleAllowError;
 
                 default:
                     return 0f;

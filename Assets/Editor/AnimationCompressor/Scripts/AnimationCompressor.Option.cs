@@ -12,17 +12,17 @@ namespace AnimationCompressor
         /// <summary>
         /// Allowable range position error
         /// </summary>
-        public float PositionAllowError { get; set; } = 0.5f;
+        public float PositionAllowError { get; set; } = 0.1f;
 
         /// <summary>
         /// Allowable range rotation error
         /// </summary>
-        public float RotationAllowError { get; set; } = 0.5f;
+        public float RotationAllowError { get; set; } = 0.1f;
 
         /// <summary>
         /// Allowable range scale error
         /// </summary>
-        public float ScaleAllowError { get; set; } = 0.8f;
+        public float ScaleAllowError { get; set; } = 0.3f;
 
         /// <summary>
         /// TODO : Improved accuracy for endpoints such as feet and hands
