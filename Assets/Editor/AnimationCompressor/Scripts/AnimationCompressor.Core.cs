@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
@@ -45,7 +44,7 @@ namespace AnimationCompressor
             if (option.AccurateEndPointNodes)
             {
                 // Cache node map for accurate end point nodes
-                // Cache what node is end point 
+                // Cache what node is end point
                 var maxDepth = -1;
                 var curveBindings = AnimationUtility.GetCurveBindings(originClip);
                 foreach (var curveBinding in curveBindings)
@@ -64,7 +63,7 @@ namespace AnimationCompressor
                         maxDepth = pathDepth;
                 }
 
-                if(option.Logging)
+                if (option.Logging)
                 {
                     Debug.Log($"{nameof(AnimationCompressor)} maxDepth : {maxDepth}");
                 }
@@ -87,15 +86,18 @@ namespace AnimationCompressor
 
             foreach (var curveBinding in curveBindings)
             {
+                var path = curveBinding.path;
+                var depth = GetPathDepth(path);
                 var originCurve = AnimationUtility.GetEditorCurve(originClip, curveBinding);
                 var compressCurve = AnimationUtility.GetEditorCurve(originClip, curveBinding);
                 compressCurve.keys = null;
 
                 // Key frame reduction by Option.AllowErrorRange
-                CompressByKeyframeReduction(originCurve, compressCurve, GetAllowErrorValue(curveBinding.propertyName));
+                CompressByKeyframeReduction(originCurve, compressCurve, GetAllowErrorValue(curveBinding.propertyName, depth));
 
+                // WIP : looks like trash now
                 // Interpolate end point node (hand, feet)
-                InterpolateAccurateEndPointNode(originClip, curveBinding.path, originCurve, compressCurve);
+                //InterpolateAccurateEndPointNode(originClip, curveBinding.path, originCurve, compressCurve);
 
                 compressClip.SetCurve(curveBinding.path, curveBinding.type, curveBinding.propertyName, compressCurve);
             }
@@ -103,47 +105,96 @@ namespace AnimationCompressor
 
         private void CompressByKeyframeReduction(AnimationCurve originCurve, AnimationCurve compressCurve, float allowErrorRange)
         {
-            var processedIdx = new HashSet<int>();
+            var itrCount = 0f;
+
+            compressCurve.AddKey(originCurve.keys[0]);
+            compressCurve.AddKey(originCurve.keys[originCurve.keys.Length - 1]);
 
             while (true)
             {
-                var highestIdx = -1;
-                for (var i = 0; i < originCurve.keys.Length; i++)
+                var tick = 0f;
+                var term = 0.01f;
+                var time = originCurve.keys[originCurve.keys.Length - 1].time;
+
+                var highestOffset = -1f;
+                var highestOffsetTick = -1f;
+
+                while (tick < time)
                 {
-                    if (processedIdx.Contains(i))
-                        continue;
+                    var orgEv = originCurve.Evaluate(tick);
+                    var compEv = compressCurve.Evaluate(tick);
+                    var offset = Mathf.Abs(orgEv - compEv);
 
-                    var key = originCurve.keys[i];
-
-                    if (highestIdx == -1)
+                    if (offset >= allowErrorRange)
                     {
-                        highestIdx = i;
-                        continue;
+                        if (offset > highestOffset)
+                        {
+                            highestOffset = offset;
+                            highestOffsetTick = tick;
+                        }
                     }
-                    else
-                    {
-                        var highestValue = Math.Abs(originCurve.keys[highestIdx].value);
-                        var value = Math.Abs(key.value);
 
-                        if (value >= highestValue)
-                            highestIdx = i;
-                    }
+                    tick += term;
                 }
 
-                if (highestIdx == -1)
+                if (highestOffset == -1)
                     break;
 
-                var targetValue = originCurve.keys[highestIdx].value;
-                if (Mathf.Abs(targetValue) >= allowErrorRange)
-                {
-                    compressCurve.AddKey(originCurve.keys[highestIdx]);
-                    //originCurve.RemoveKey(highKeyIdx);
-                    processedIdx.Add(highestIdx);
-                }
-                else
-                    break;
+                var key = new Keyframe();
+                key.time = highestOffsetTick;
+                key.value = originCurve.Evaluate(highestOffsetTick);
+
+                compressCurve.AddKey(key);
+                itrCount++;
             }
+
+            if(option.Logging)
+                Debug.Log($"{nameof(AnimationCompressor)} itrCount : {itrCount}");
         }
+
+        //private void CompressByKeyframeReduction(AnimationCurve originCurve, AnimationCurve compressCurve, float allowErrorRange)
+        //{
+        //    var processedIdx = new HashSet<int>();
+
+        //    while (true)
+        //    {
+        //        var highestIdx = -1;
+        //        for (var i = 0; i < originCurve.keys.Length; i++)
+        //        {
+        //            if (processedIdx.Contains(i))
+        //                continue;
+
+        //            var key = originCurve.keys[i];
+
+        //            if (highestIdx == -1)
+        //            {
+        //                highestIdx = i;
+        //                continue;
+        //            }
+        //            else
+        //            {
+        //                var highestValue = Math.Abs(originCurve.keys[highestIdx].value);
+        //                var value = Math.Abs(key.value);
+
+        //                if (value >= highestValue)
+        //                    highestIdx = i;
+        //            }
+        //        }
+
+        //        if (highestIdx == -1)
+        //            break;
+
+        //        var targetValue = originCurve.keys[highestIdx].value;
+        //        if (Mathf.Abs(targetValue) >= allowErrorRange)
+        //        {
+        //            compressCurve.AddKey(originCurve.keys[highestIdx]);
+        //            //originCurve.RemoveKey(highKeyIdx);
+        //            processedIdx.Add(highestIdx);
+        //        }
+        //        else
+        //            break;
+        //    }
+        //}
 
         private void InterpolateAccurateEndPointNode(AnimationClip originClip, string path, AnimationCurve originCurve, AnimationCurve compressCurve)
         {
@@ -157,12 +208,12 @@ namespace AnimationCompressor
             var term = 0.01f;
             var max = originCurve.keys[originCurve.keys.Length - 1].time;
 
-            while(true)
+            while (true)
             {
                 var originEv = originCurve.Evaluate(tick);
-                var compressEv =compressCurve.Evaluate(tick);
+                var compressEv = compressCurve.Evaluate(tick);
 
-                if(Mathf.Abs(originEv - compressEv) > 0.01f)
+                if (Mathf.Abs(originEv - compressEv) > 0.01f)
                 {
                     var key = new Keyframe();
                     key.time = tick;
@@ -170,7 +221,6 @@ namespace AnimationCompressor
 
                     compressCurve.AddKey(key);
                 }
-
 
                 tick += term;
                 if (term >= max)
@@ -203,28 +253,29 @@ namespace AnimationCompressor
             return matches.Count;
         }
 
-        private float GetAllowErrorValue(string propertyName)
+        private float GetAllowErrorValue(string propertyName, int depth = 1)
         {
+            var fDepth = (float)depth;
             switch (propertyName)
             {
                 case "m_LocalPositio":
                 case "m_LocalPosition.x":
                 case "m_LocalPosition.y":
                 case "m_LocalPosition.z":
-                    return option.PositionAllowError;
+                    return option.PositionAllowError / fDepth;
 
                 case "m_LocalRotation":
                 case "m_LocalRotation.x":
                 case "m_LocalRotation.y":
                 case "m_LocalRotation.z":
                 case "m_LocalRotation.w":
-                    return option.RotationAllowError;
+                    return option.RotationAllowError / fDepth;
 
                 case "m_LocalScale":
                 case "m_LocalScale.y":
                 case "m_LocalScale.z":
                 case "m_LocalScale.x":
-                    return option.ScaleAllowError;
+                    return option.ScaleAllowError / fDepth;
 
                 default:
                     return 0f;
