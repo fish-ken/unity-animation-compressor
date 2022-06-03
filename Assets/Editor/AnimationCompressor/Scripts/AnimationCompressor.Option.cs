@@ -27,7 +27,19 @@ namespace AnimationCompressor
         /// <summary>
         /// Improved accuracy for endpoints such as feet and hands
         /// </summary>
-        public bool AccurateEndPointNode { get; set; } = true;
+        public bool AccurateEndPointNodes { get; set; } = true;
+
+        /// <summary>
+        /// Endpoint computation tolerance
+        /// if 3, Allow up to 3 layers from the end
+        /// </summary>
+        public int EndPointNodesDepthMin { get; set; } = 4;
+
+        /// <summary>
+        /// Endpoint computation tolerance
+        /// if 3, Allow up to 3 layers from the end
+        /// </summary>
+        public int EndPointNodesDepthMax { get; set; } = 10;
 
         public void OnGUI()
         {
@@ -35,7 +47,9 @@ namespace AnimationCompressor
             PositionAllowError = EditorGUILayout.FloatField(nameof(PositionAllowError), PositionAllowError);
             RotationAllowError = EditorGUILayout.FloatField(nameof(RotationAllowError), RotationAllowError);
             ScaleAllowError = EditorGUILayout.FloatField(nameof(ScaleAllowError), ScaleAllowError);
-            AccurateEndPointNode = EditorGUILayout.Toggle(nameof(AccurateEndPointNode), AccurateEndPointNode);
+            AccurateEndPointNodes = EditorGUILayout.Toggle(nameof(AccurateEndPointNodes), AccurateEndPointNodes);
+            EndPointNodesDepthMin = EditorGUILayout.IntField(nameof(EndPointNodesDepthMin), EndPointNodesDepthMin);
+            EndPointNodesDepthMax = EditorGUILayout.IntField(nameof(EndPointNodesDepthMax), EndPointNodesDepthMax);
         }
     }
 }
