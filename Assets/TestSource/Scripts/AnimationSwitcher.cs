@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 public class AnimationSwitcher : MonoBehaviour
 {
@@ -11,15 +12,27 @@ public class AnimationSwitcher : MonoBehaviour
 
     private void Update()
     {
-        var clipCount = aniComp.GetClipCount();
+        var keys = new List<KeyCode>()
+        {
+            KeyCode.Alpha1,
+            KeyCode.Alpha2,
+            KeyCode.Alpha3,
+            KeyCode.Alpha4,
+            KeyCode.Alpha5,
+            KeyCode.Alpha6,
+            KeyCode.Alpha7,
+            KeyCode.Alpha8,
+            KeyCode.Alpha9,
+        };
 
-        if (Input.GetKeyDown(KeyCode.Alpha1))
+        foreach (var key in keys)
         {
-            PlayAni(0);
-        }
-        else if (Input.GetKeyDown(KeyCode.Alpha2))
-        {
-            PlayAni(1);
+            if (Input.GetKeyDown(key))
+            {
+                var idx = (int)key - (int)KeyCode.Alpha1;
+                PlayAni(idx);
+                break;
+            }
         }
     }
 
