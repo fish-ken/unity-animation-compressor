@@ -13,6 +13,9 @@ Blue - Compressed clip
 1. Adjust some options  
 1. Click Compress button  
 
+## WIP
+1. Accurate end point node (hand, feet)
+
 ## Contribution
 Contributions are always welcome.
 Create [Issue](https://github.com/fish-ken/unity-animation-compressor/issues) or [Pull Request](https://github.com/fish-ken/unity-animation-compressor/pulls).
