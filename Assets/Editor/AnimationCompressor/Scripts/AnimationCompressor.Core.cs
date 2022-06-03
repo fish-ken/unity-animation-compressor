@@ -255,7 +255,9 @@ namespace AnimationCompressor
 
         private float GetAllowErrorValue(string propertyName, int depth = 1)
         {
-            depth = Mathf.Max(1, depth);
+            //depth = Mathf.Max(1, depth);
+            depth = 1;
+
             var fDepth = (float)depth;
             switch (propertyName)
             {
