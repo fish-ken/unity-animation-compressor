@@ -103,7 +103,7 @@ namespace AnimationCompressor
             var outputPath = originPath.Replace($"{originClip.name}.anim", $"{originClip.name}_Compressed.anim");
 
             if (option.Logging)
-                Debug.Log(outputPath);
+                Debug.Log($"{nameof(AnimationCompressor)} Output path : {outputPath}");
 
             return outputPath;
         }
