@@ -12,22 +12,22 @@ namespace AnimationCompressor
         /// <summary>
         /// Allowable range position error
         /// </summary>
-        public float PositionAllowError { get; set; } = 0.1f;
+        public float PositionAllowError { get; set; } = 0.02f;
 
         /// <summary>
         /// Allowable range rotation error
         /// </summary>
-        public float RotationAllowError { get; set; } = 0.1f;
+        public float RotationAllowError { get; set; } = 0.01f;
 
         /// <summary>
         /// Allowable range scale error
         /// </summary>
-        public float ScaleAllowError { get; set; } = 0.3f;
+        public float ScaleAllowError { get; set; } = 0.05f;
 
         /// <summary>
-        /// TODO : Improved accuracy for endpoints such as feet and hands
+        /// Improved accuracy for endpoints such as feet and hands
         /// </summary>
-        //public bool AccurateEndPointNode { get; set; } = false;
+        public bool AccurateEndPointNode { get; set; } = true;
 
         public void OnGUI()
         {
@@ -35,8 +35,7 @@ namespace AnimationCompressor
             PositionAllowError = EditorGUILayout.FloatField(nameof(PositionAllowError), PositionAllowError);
             RotationAllowError = EditorGUILayout.FloatField(nameof(RotationAllowError), RotationAllowError);
             ScaleAllowError = EditorGUILayout.FloatField(nameof(ScaleAllowError), ScaleAllowError);
-
-            //AccurateEndPointNode = EditorGUILayout.Toggle(nameof(AccurateEndPointNode), AccurateEndPointNode);
+            AccurateEndPointNode = EditorGUILayout.Toggle(nameof(AccurateEndPointNode), AccurateEndPointNode);
         }
     }
 }
