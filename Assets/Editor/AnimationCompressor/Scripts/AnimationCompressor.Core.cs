@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
+using System.Text;
 using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
@@ -15,6 +16,8 @@ namespace AnimationCompressor
 
         // Cache end point node path name
         private HashSet<string> endPointNodeSet = new HashSet<string>();
+
+        private int maxDepth = -1;
 
         public void Compress(AnimationClip originClip, Option option)
         {
@@ -45,7 +48,7 @@ namespace AnimationCompressor
             {
                 // Cache node map for accurate end point nodes
                 // Cache what node is end point
-                var maxDepth = -1;
+                maxDepth = -1;
                 var curveBindings = AnimationUtility.GetCurveBindings(originClip);
                 foreach (var curveBinding in curveBindings)
                 {
@@ -103,6 +106,7 @@ namespace AnimationCompressor
             }
         }
 
+        // Version 3 
         private void CompressByKeyframeReduction(AnimationCurve originCurve, AnimationCurve compressCurve, float allowErrorRange)
         {
             var itrCount = 0f;
@@ -148,10 +152,61 @@ namespace AnimationCompressor
                 itrCount++;
             }
 
-            if(option.Logging)
+            if (option.Logging)
                 Debug.Log($"{nameof(AnimationCompressor)} itrCount : {itrCount}");
         }
 
+        // Version 2
+        //private void CompressByKeyframeReduction(AnimationCurve originCurve, AnimationCurve compressCurve, float allowErrorRange)
+        //{
+        //    var itrCount = 0f;
+
+        //    compressCurve.AddKey(originCurve.keys[0]);
+        //    compressCurve.AddKey(originCurve.keys[originCurve.keys.Length - 1]);
+
+        //    while (true)
+        //    {
+        //        var tick = 0f;
+        //        var term = 0.01f;
+        //        var time = originCurve.keys[originCurve.keys.Length - 1].time;
+
+        //        var highestOffset = -1f;
+        //        var highestOffsetTick = -1f;
+
+        //        while (tick < time)
+        //        {
+        //            var orgEv = originCurve.Evaluate(tick);
+        //            var compEv = compressCurve.Evaluate(tick);
+        //            var offset = Mathf.Abs(orgEv - compEv);
+
+        //            if (offset >= allowErrorRange)
+        //            {
+        //                if (offset > highestOffset)
+        //                {
+        //                    highestOffset = offset;
+        //                    highestOffsetTick = tick;
+        //                }
+        //            }
+
+        //            tick += term;
+        //        }
+
+        //        if (highestOffset == -1)
+        //            break;
+
+        //        var key = new Keyframe();
+        //        key.time = highestOffsetTick;
+        //        key.value = originCurve.Evaluate(highestOffsetTick);
+
+        //        compressCurve.AddKey(key);
+        //        itrCount++;
+        //    }
+
+        //    if(option.Logging)
+        //        Debug.Log($"{nameof(AnimationCompressor)} itrCount : {itrCount}");
+        //}
+
+        // Version 1
         //private void CompressByKeyframeReduction(AnimationCurve originCurve, AnimationCurve compressCurve, float allowErrorRange)
         //{
         //    var processedIdx = new HashSet<int>();
@@ -233,8 +288,19 @@ namespace AnimationCompressor
             if (originClip == null)
                 return string.Empty;
 
+            // From asdf/asdf/asdf@atk.FBX
             var originPath = AssetDatabase.GetAssetPath(originClip);
-            var outputPath = originPath.Replace($"{originClip.name}.anim", $"{originClip.name}_Compressed.anim");
+            var split = originPath.Split('.');
+
+            // To asdf/asdf/asdf@atk
+            var builder = new StringBuilder();
+            for (var i = 0; i < split.Length - 1; i++)
+                builder.Append(split[i]);
+
+            // To asdf/asdf/asdf@atk_Compressed.anim
+            builder.Append("_Compressed.anim");
+
+            var outputPath = builder.ToString();
 
             if (option.Logging)
                 Debug.Log($"{nameof(AnimationCompressor)} Output path : {outputPath}");
@@ -255,13 +321,17 @@ namespace AnimationCompressor
 
         private float GetAllowErrorValue(string propertyName, int depth = 1)
         {
-            //depth = Mathf.Max(1, depth);
-            depth = 1;
+            // Restrict divide by zero
+            depth = Mathf.Max(1, depth);
 
             var fDepth = (float)depth;
+
+            var revDepth = maxDepth - depth;
+            var multiplier = (float)revDepth;
+
             switch (propertyName)
             {
-                case "m_LocalPositio":
+                case "m_LocalPosition":
                 case "m_LocalPosition.x":
                 case "m_LocalPosition.y":
                 case "m_LocalPosition.z":
