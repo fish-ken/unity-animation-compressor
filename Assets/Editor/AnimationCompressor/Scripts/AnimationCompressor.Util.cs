@@ -19,6 +19,21 @@ namespace AnimationCompressor
         }
 
         /// <summary>
+        /// Get upper depth
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        public static string GetUpperDepth(string path)
+        {
+            if (path.Contains("/") == false)
+                return null;
+
+            var idx = path.LastIndexOf('/');
+            var cnt = path.Length - idx;
+            return path.Remove(idx, cnt);
+        }
+
+        /// <summary>
         /// Get destination output path
         /// </summary>
         /// <param name="originClip"></param>

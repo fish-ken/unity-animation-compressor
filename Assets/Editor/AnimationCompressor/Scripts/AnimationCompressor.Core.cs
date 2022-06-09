@@ -7,8 +7,10 @@ namespace AnimationCompressor
     public class Core
     {
         private Option option = null;
+        private AnimationClip originClip = null;
+        private AnimationClip compressClip = null;
 
-        private Bone RootBone = null;
+        private Dictionary<string, Bone> boneMap = new Dictionary<string, Bone>();
 
         private int maxDepth = -1;
 
@@ -21,81 +23,93 @@ namespace AnimationCompressor
             }
 
             this.option = option;
+            this.originClip = originClip;
 
+            ProcessCompress();
+        }
+
+        private void ProcessCompress()
+        {
             var outputPath = Util.GetOutputPath(originClip);
-            var compressClip = Object.Instantiate(originClip);
+            compressClip = Object.Instantiate(originClip);
             compressClip.ClearCurves();
 
-            PreCompress(originClip, compressClip);
-            Compress(originClip, compressClip);
+            PreCompress();
+            Compress();
 
             AssetDatabase.CreateAsset(compressClip, outputPath);
             AssetDatabase.SaveAssets();
         }
 
-        private void PreCompress(AnimationClip originClip, AnimationClip compressClip)
+        private void PreCompress()
         {
-            nodeMap.Clear();
+            GenerateBoneMap();
+        }
 
-            if (option.AccurateEndPointNodes)
+        private void GenerateBoneMap()
+        {
+            boneMap.Clear();
+
+            // Create bone map
+            var bindings = AnimationUtility.GetCurveBindings(originClip);
+            foreach (var binding in bindings)
             {
-                // Cache node map for accurate end point nodes
-                // Cache what node is end point
-                maxDepth = -1;
-                var curveBindings = AnimationUtility.GetCurveBindings(originClip);
-                foreach (var curveBinding in curveBindings)
+                var path = binding.path;
+                var propertyName = binding.propertyName;
+                var curve = AnimationUtility.GetEditorCurve(originClip, binding);
+                Bone bone;
+
+                if (boneMap.ContainsKey(path) == false)
+                    boneMap[path] = new Bone(path);
+
+                bone = boneMap[path];
+                bone.SetCurve(propertyName, curve);
+
+            }
+
+            // Set parent 
+            foreach (var bone in boneMap.Values)
+            {
+                var upperPath = Util.GetUpperDepth(bone.Path);
+
+                while(string.IsNullOrEmpty(upperPath) == false)
                 {
-                    var curve = AnimationUtility.GetEditorCurve(originClip, curveBinding);
-                    var path = curveBinding.path;
-                    var propertyName = curveBinding.propertyName;
-                    var pathDepth = GetPathDepth(path);
+                    if(boneMap.ContainsKey(upperPath))
+                    {
+                        bone.SetParent(boneMap[upperPath]);
+                        break;
+                    }
 
-                    if (nodeMap.ContainsKey(path) == false)
-                        nodeMap[path] = new Dictionary<string, EditorCurveBinding>();
-
-                    nodeMap[path][propertyName] = curveBinding;
-
-                    if (pathDepth > maxDepth)
-                        maxDepth = pathDepth;
+                    upperPath = Util.GetUpperDepth(bone.Path);
                 }
-
-                Debug.Log($"{nameof(AnimationCompressor)} maxDepth : {maxDepth}");
-
-                foreach (var path in nodeMap.Keys)
-                {
-                    var depth = GetPathDepth(path);
-                    if (depth >= option.EndPointNodesRange && depth <= option.EndPointNodesDepthMax)
-                        endPointNodeSet.Add(path);
-                }
-
-                if (option.Logging)
-                    Debug.Log($"{nameof(AnimationCompressor)} endPointNodeSet : {string.Join("\n", endPointNodeSet)}");
             }
         }
 
-        private void Compress(AnimationClip originClip, AnimationClip compressClip)
+
+        private void Compress()
         {
             var curveBindings = AnimationUtility.GetCurveBindings(originClip);
 
             foreach (var curveBinding in curveBindings)
             {
                 var path = curveBinding.path;
-                var depth = GetPathDepth(path);
+                var depth = Util.GetDepth(path);
                 var originCurve = AnimationUtility.GetEditorCurve(originClip, curveBinding);
                 var compressCurve = AnimationUtility.GetEditorCurve(originClip, curveBinding);
                 compressCurve.keys = null;
 
-                // Key frame reduction by Option.AllowErrorRange
                 CompressByKeyframeReduction(originCurve, compressCurve, GetAllowErrorValue(curveBinding.propertyName, depth));
-
-                // WIP : looks like trash now
-                // Interpolate end point node (hand, feet)
-                //InterpolateAccurateEndPointNode(originClip, curveBinding.path, originCurve, compressCurve);
 
                 compressClip.SetCurve(curveBinding.path, curveBinding.type, curveBinding.propertyName, compressCurve);
             }
         }
 
+        /// <summary>
+        /// allow range 보다 큰 지점에 key 추가
+        /// </summary>
+        /// <param name="originCurve"></param>
+        /// <param name="compressCurve"></param>
+        /// <param name="allowErrorRange"></param>
         private void CompressByKeyframeReduction(AnimationCurve originCurve, AnimationCurve compressCurve, float allowErrorRange)
         {
             var itrCount = 0f;
@@ -141,40 +155,7 @@ namespace AnimationCompressor
                 itrCount++;
             }
 
-            if (option.Logging)
-                Debug.Log($"{nameof(AnimationCompressor)} itrCount : {itrCount}");
-        }
-
-        private void InterpolateAccurateEndPointNode(AnimationClip originClip, string path, AnimationCurve originCurve, AnimationCurve compressCurve)
-        {
-            if (option.AccurateEndPointNodes == false)
-                return;
-
-            if (endPointNodeSet.Contains(path) == false)
-                return;
-
-            var tick = 0f;
-            var term = 0.01f;
-            var max = originCurve.keys[originCurve.keys.Length - 1].time;
-
-            while (true)
-            {
-                var originEv = originCurve.Evaluate(tick);
-                var compressEv = compressCurve.Evaluate(tick);
-
-                if (Mathf.Abs(originEv - compressEv) > 0.01f)
-                {
-                    var key = new Keyframe();
-                    key.time = tick;
-                    key.value = originEv;
-
-                    compressCurve.AddKey(key);
-                }
-
-                tick += term;
-                if (term >= max)
-                    break;
-            }
+            Debug.Log($"{nameof(AnimationCompressor)} itrCount : {itrCount}");
         }
 
         private string GetNodeMapCacheKey(EditorCurveBinding curveBinding)
@@ -198,20 +179,20 @@ namespace AnimationCompressor
                 case "m_LocalPosition.x":
                 case "m_LocalPosition.y":
                 case "m_LocalPosition.z":
-                    return option.PositionAllowError / fDepth;
+                    return option.PositionAllowError; // fDepth;
 
                 case "m_LocalRotation":
                 case "m_LocalRotation.x":
                 case "m_LocalRotation.y":
                 case "m_LocalRotation.z":
                 case "m_LocalRotation.w":
-                    return option.RotationAllowError / fDepth;
+                    return option.RotationAllowError; // fDepth;
 
                 case "m_LocalScale":
                 case "m_LocalScale.y":
                 case "m_LocalScale.z":
                 case "m_LocalScale.x":
-                    return option.ScaleAllowError / fDepth;
+                    return option.ScaleAllowError;/// fDepth;
 
                 default:
                     return 0f;
