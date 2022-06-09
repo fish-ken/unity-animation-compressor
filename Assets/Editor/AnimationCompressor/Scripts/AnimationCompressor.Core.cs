@@ -24,8 +24,8 @@ namespace AnimationCompressor
 
             this.option = option;
 
-            var outputPath = GetOutputPath(originClip, option);
-            var compressClip = UnityEngine.Object.Instantiate(originClip);
+            var outputPath = Util.GetOutputPath(originClip);
+            var compressClip = Object.Instantiate(originClip);
             compressClip.ClearCurves();
 
             PreCompress(originClip, compressClip);
@@ -180,31 +180,6 @@ namespace AnimationCompressor
                 if (term >= max)
                     break;
             }
-        }
-
-        private string GetOutputPath(AnimationClip originClip, Option option)
-        {
-            if (originClip == null)
-                return string.Empty;
-
-            // From asdf/asdf/asdf@atk.FBX
-            var originPath = AssetDatabase.GetAssetPath(originClip);
-            var split = originPath.Split('.');
-
-            // To asdf/asdf/asdf@atk
-            var builder = new StringBuilder();
-            for (var i = 0; i < split.Length - 1; i++)
-                builder.Append(split[i]);
-
-            // To asdf/asdf/asdf@atk_Compressed.anim
-            builder.Append("_Compressed.anim");
-
-            var outputPath = builder.ToString();
-
-            if (option.Logging)
-                Debug.Log($"{nameof(AnimationCompressor)} Output path : {outputPath}");
-
-            return outputPath;
         }
 
         private string GetNodeMapCacheKey(EditorCurveBinding curveBinding)
