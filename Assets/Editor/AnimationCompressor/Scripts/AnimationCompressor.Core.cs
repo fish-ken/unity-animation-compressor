@@ -1,6 +1,4 @@
 using System.Collections.Generic;
-using System.Text;
-using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
 
@@ -61,15 +59,12 @@ namespace AnimationCompressor
                         maxDepth = pathDepth;
                 }
 
-                if (option.Logging)
-                {
-                    Debug.Log($"{nameof(AnimationCompressor)} maxDepth : {maxDepth}");
-                }
+                Debug.Log($"{nameof(AnimationCompressor)} maxDepth : {maxDepth}");
 
                 foreach (var path in nodeMap.Keys)
                 {
                     var depth = GetPathDepth(path);
-                    if (depth >= option.EndPointNodesDepthMin && depth <= option.EndPointNodesDepthMax)
+                    if (depth >= option.EndPointNodesRange && depth <= option.EndPointNodesDepthMax)
                         endPointNodeSet.Add(path);
                 }
 
