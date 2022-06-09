@@ -10,12 +10,7 @@ namespace AnimationCompressor
     {
         private Option option = null;
 
-        // Key - Path
-        // Value - PropertyName, EditorCurveBinding
-        private Dictionary<string, Dictionary<string, EditorCurveBinding>> nodeMap = new Dictionary<string, Dictionary<string, EditorCurveBinding>>();
-
-        // Cache end point node path name
-        private HashSet<string> endPointNodeSet = new HashSet<string>();
+        private Bone RootBone = null;
 
         private int maxDepth = -1;
 
@@ -106,7 +101,6 @@ namespace AnimationCompressor
             }
         }
 
-        // Version 3 
         private void CompressByKeyframeReduction(AnimationCurve originCurve, AnimationCurve compressCurve, float allowErrorRange)
         {
             var itrCount = 0f;
@@ -155,101 +149,6 @@ namespace AnimationCompressor
             if (option.Logging)
                 Debug.Log($"{nameof(AnimationCompressor)} itrCount : {itrCount}");
         }
-
-        // Version 2
-        //private void CompressByKeyframeReduction(AnimationCurve originCurve, AnimationCurve compressCurve, float allowErrorRange)
-        //{
-        //    var itrCount = 0f;
-
-        //    compressCurve.AddKey(originCurve.keys[0]);
-        //    compressCurve.AddKey(originCurve.keys[originCurve.keys.Length - 1]);
-
-        //    while (true)
-        //    {
-        //        var tick = 0f;
-        //        var term = 0.01f;
-        //        var time = originCurve.keys[originCurve.keys.Length - 1].time;
-
-        //        var highestOffset = -1f;
-        //        var highestOffsetTick = -1f;
-
-        //        while (tick < time)
-        //        {
-        //            var orgEv = originCurve.Evaluate(tick);
-        //            var compEv = compressCurve.Evaluate(tick);
-        //            var offset = Mathf.Abs(orgEv - compEv);
-
-        //            if (offset >= allowErrorRange)
-        //            {
-        //                if (offset > highestOffset)
-        //                {
-        //                    highestOffset = offset;
-        //                    highestOffsetTick = tick;
-        //                }
-        //            }
-
-        //            tick += term;
-        //        }
-
-        //        if (highestOffset == -1)
-        //            break;
-
-        //        var key = new Keyframe();
-        //        key.time = highestOffsetTick;
-        //        key.value = originCurve.Evaluate(highestOffsetTick);
-
-        //        compressCurve.AddKey(key);
-        //        itrCount++;
-        //    }
-
-        //    if(option.Logging)
-        //        Debug.Log($"{nameof(AnimationCompressor)} itrCount : {itrCount}");
-        //}
-
-        // Version 1
-        //private void CompressByKeyframeReduction(AnimationCurve originCurve, AnimationCurve compressCurve, float allowErrorRange)
-        //{
-        //    var processedIdx = new HashSet<int>();
-
-        //    while (true)
-        //    {
-        //        var highestIdx = -1;
-        //        for (var i = 0; i < originCurve.keys.Length; i++)
-        //        {
-        //            if (processedIdx.Contains(i))
-        //                continue;
-
-        //            var key = originCurve.keys[i];
-
-        //            if (highestIdx == -1)
-        //            {
-        //                highestIdx = i;
-        //                continue;
-        //            }
-        //            else
-        //            {
-        //                var highestValue = Math.Abs(originCurve.keys[highestIdx].value);
-        //                var value = Math.Abs(key.value);
-
-        //                if (value >= highestValue)
-        //                    highestIdx = i;
-        //            }
-        //        }
-
-        //        if (highestIdx == -1)
-        //            break;
-
-        //        var targetValue = originCurve.keys[highestIdx].value;
-        //        if (Mathf.Abs(targetValue) >= allowErrorRange)
-        //        {
-        //            compressCurve.AddKey(originCurve.keys[highestIdx]);
-        //            //originCurve.RemoveKey(highKeyIdx);
-        //            processedIdx.Add(highestIdx);
-        //        }
-        //        else
-        //            break;
-        //    }
-        //}
 
         private void InterpolateAccurateEndPointNode(AnimationClip originClip, string path, AnimationCurve originCurve, AnimationCurve compressCurve)
         {
@@ -311,12 +210,6 @@ namespace AnimationCompressor
         private string GetNodeMapCacheKey(EditorCurveBinding curveBinding)
         {
             return $"{curveBinding.path}_{curveBinding.propertyName}";
-        }
-
-        private int GetPathDepth(string path)
-        {
-            var matches = Regex.Matches(path, "/");
-            return matches.Count;
         }
 
         private float GetAllowErrorValue(string propertyName, int depth = 1)

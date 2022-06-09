@@ -6,6 +6,8 @@ using UnityEngine;
 
 namespace AnimationCompressor
 {
+    // Not acturally bone
+    
     public class Bone
     {
         public Bone Parent { get; private set; }
@@ -14,11 +16,15 @@ namespace AnimationCompressor
 
         public AnimationCurve Curve { get; private set; }
 
-        public float Sample()
+        public float Sample(float time)
         {
-            if(Parent)
+            
+            var value = 0f;
 
-            Parent.Sample();
+            if(Parent != null)
+                value += Parent.Sample(time);
+
+            return value;
         }
     }
 }
