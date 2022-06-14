@@ -1,5 +1,6 @@
 using System.IO;
 using UnityEditor;
+using UnityEditor.Experimental;
 using UnityEngine;
 
 namespace AnimationCompressor
@@ -28,16 +29,23 @@ namespace AnimationCompressor
         {
             var outputPath = Util.GetOutputPath(originClip);
             compressClip = Object.Instantiate(originClip);
+
+            if (File.Exists(outputPath))
+            {
+                var exist = AssetDatabase.LoadAssetAtPath<AnimationClip>(outputPath);
+                EditorUtility.CopySerialized(exist, compressClip);
+            }
+
             compressClip.ClearCurves();
 
             PreCompress();
             Compress();
 
-            if(File.Exists(outputPath))
-                AssetDatabase.DeleteAsset(outputPath);
-
+            
             AssetDatabase.CreateAsset(compressClip, outputPath);
             AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            //File.Move(outputPath, )
         }
 
         private void PreCompress()
