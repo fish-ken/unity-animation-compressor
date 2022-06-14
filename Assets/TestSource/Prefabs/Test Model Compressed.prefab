@@ -5003,11 +5003,7 @@ Animation:
   m_Animations:
   - {fileID: 7400000, guid: 59938e419208b064fb6fecda630641e4, type: 2}
   - {fileID: 7400000, guid: 786b5cc3081138f44a08e1090e3b95c5, type: 2}
-  - {fileID: 7400000, guid: d094fd01eb9da76459e778a9023fd104, type: 2}
-  - {fileID: 7400000, guid: e3bcb27051b852b4b8b73fdf6e30396f, type: 2}
-  - {fileID: 7400000, guid: f7050fddd17eef04fb39a1693c4aa11f, type: 2}
   - {fileID: 7400000, guid: 442308e9c21749d4692101a75e013dc6, type: 2}
-  - {fileID: 7400000, guid: ba7350a3f3926b74897d137468ef5234, type: 2}
   m_WrapMode: 0
   m_PlayAutomatically: 1
   m_AnimatePhysics: 0
