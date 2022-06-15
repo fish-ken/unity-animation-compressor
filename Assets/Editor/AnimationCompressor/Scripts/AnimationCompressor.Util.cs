@@ -57,5 +57,36 @@ namespace AnimationCompressor
             builder.Append("_Compressed.anim");
             return builder.ToString();
         }
+
+        /// <summary>
+        /// Return true, if property is transform key (positio, rotation, scale)
+        /// </summary>
+        /// <param name="propertyName"></param>
+        /// <returns></returns>
+        public static bool IsTransformKey(string propertyName)
+        {
+            switch (propertyName)
+            {
+                case "m_LocalPosition":
+                case "m_LocalPosition.x":
+                case "m_LocalPosition.y":
+                case "m_LocalPosition.z":
+
+                case "m_LocalRotation":
+                case "m_LocalRotation.x":
+                case "m_LocalRotation.y":
+                case "m_LocalRotation.z":
+                case "m_LocalRotation.w":
+
+                case "m_LocalScale":
+                case "m_LocalScale.y":
+                case "m_LocalScale.z":
+                case "m_LocalScale.x":
+                    return true;
+
+                default:
+                    return false;
+            }
+        }
     }
 }
