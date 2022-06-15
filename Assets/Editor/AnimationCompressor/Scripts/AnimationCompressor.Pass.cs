@@ -11,13 +11,16 @@ namespace AnimationCompressor
 
             foreach (var curveBinding in curveBindings)
             {
-                var path = curveBinding.path;
-                var depth = Util.GetDepth(path);
+                var isTansformCurve = Util.IsTransformKey(curveBinding.propertyName);
                 var originCurve = AnimationUtility.GetEditorCurve(originClip, curveBinding);
                 var compressCurve = AnimationUtility.GetEditorCurve(originClip, curveBinding);
-                compressCurve.keys = null;
 
-                CompressByKeyframeReduction(originCurve, compressCurve, GetAllowErrorValue(curveBinding.propertyName, depth));
+                // Only working on transform keys
+                if(isTansformCurve)
+                {
+                    compressCurve.keys = null;
+                    CompressByKeyframeReduction(curveBinding, originCurve, compressCurve);
+                }
 
                 compressClip.SetCurve(curveBinding.path, curveBinding.type, curveBinding.propertyName, compressCurve);
             }
@@ -29,13 +32,18 @@ namespace AnimationCompressor
         /// <param name="originCurve"></param>
         /// <param name="compressCurve"></param>
         /// <param name="allowErrorRange"></param>
-        private void CompressByKeyframeReduction(AnimationCurve originCurve, AnimationCurve compressCurve, float allowErrorRange)
+        private void CompressByKeyframeReduction(EditorCurveBinding curveBinding, AnimationCurve originCurve, AnimationCurve compressCurve)
         {
-            var itrCount = 0f;
+            var propertyName = curveBinding.propertyName;
+            var path = curveBinding.path;
+            var depth = Util.GetDepth(path);
+            var allowErrorRange = GetAllowErrorValue(propertyName, depth);
 
+            // Add first, last key
             compressCurve.AddKey(originCurve.keys[0]);
             compressCurve.AddKey(originCurve.keys[originCurve.keys.Length - 1]);
 
+            var itrCount = 0f;
             while (true)
             {
                 var tick = 0f;
