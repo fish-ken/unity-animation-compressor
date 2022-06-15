@@ -55,7 +55,7 @@ namespace AnimationCompressor
 
         private void Compress()
         {
-            CompressByKeyframeReductionPass();
+            GenerateKeyFrameByCurveFittingPass();
         }
     }
 }

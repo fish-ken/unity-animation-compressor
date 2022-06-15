@@ -5,7 +5,7 @@ namespace AnimationCompressor
 {
     public partial class Core
     {
-        private void CompressByKeyframeReductionPass()
+        private void KeyFrameReductionPass()
         {
             var curveBindings = AnimationUtility.GetCurveBindings(originClip);
 
@@ -16,10 +16,10 @@ namespace AnimationCompressor
                 var compressCurve = AnimationUtility.GetEditorCurve(originClip, curveBinding);
 
                 // Only working on transform keys
-                if(isTansformCurve)
+                if (isTansformCurve)
                 {
                     compressCurve.keys = null;
-                    CompressByKeyframeReduction(curveBinding, originCurve, compressCurve);
+                    GenerateKeyFrameByCurveFitting(curveBinding, originCurve, compressCurve);
                 }
 
                 compressClip.SetCurve(curveBinding.path, curveBinding.type, curveBinding.propertyName, compressCurve);
@@ -27,67 +27,22 @@ namespace AnimationCompressor
         }
 
         /// <summary>
-        /// allow range 보다 큰 지점에 key 추가
+        /// 없어도될 키프레임 제거
         /// </summary>
         /// <param name="originCurve"></param>
         /// <param name="compressCurve"></param>
         /// <param name="allowErrorRange"></param>
-        private void CompressByKeyframeReduction(EditorCurveBinding curveBinding, AnimationCurve originCurve, AnimationCurve compressCurve)
+        private void KeyFrameReduction(EditorCurveBinding curveBinding, AnimationCurve originCurve, AnimationCurve compressCurve)
         {
             var propertyName = curveBinding.propertyName;
             var path = curveBinding.path;
             var depth = Util.GetDepth(path);
-            var allowErrorRange = GetAllowErrorValue(propertyName, depth);
-
-            // Add first, last key
-            compressCurve.AddKey(originCurve.keys[0]);
-            compressCurve.AddKey(originCurve.keys[originCurve.keys.Length - 1]);
-
-            var itrCount = 0f;
-            while (true)
-            {
-                var tick = 0f;
-                var term = 0.01f;
-                var time = originCurve.keys[originCurve.keys.Length - 1].time;
-
-                var highestOffset = -1f;
-                var highestOffsetTick = -1f;
-
-                while (tick < time)
-                {
-                    var orgEv = originCurve.Evaluate(tick);
-                    var compEv = compressCurve.Evaluate(tick);
-                    var offset = Mathf.Abs(orgEv - compEv);
-
-                    if (offset >= allowErrorRange)
-                    {
-                        if (offset > highestOffset)
-                        {
-                            highestOffset = offset;
-                            highestOffsetTick = tick;
-                        }
-                    }
-
-                    tick += term;
-                }
-
-                if (highestOffset == -1)
-                    break;
-
-                var key = new Keyframe();
-                key.time = highestOffsetTick;
-                key.value = originCurve.Evaluate(highestOffsetTick);
-
-                compressCurve.AddKey(key);
-                itrCount++;
-            }
+            var allowErrorRange = KeyFrameReduction_GetAllowErrorValue(propertyName, depth);
 
             Debug.Log($"{nameof(AnimationCompressor)} itrCount : {itrCount}");
         }
 
-
-
-        private float GetAllowErrorValue(string propertyName, int depth = 1)
+        private float KeyFrameReduction_GetAllowErrorValue(string propertyName, int depth = 1)
         {
             // Restrict divide by zero
             depth = Mathf.Max(1, depth);
@@ -116,7 +71,7 @@ namespace AnimationCompressor
                 case "m_LocalScale.y":
                 case "m_LocalScale.z":
                 case "m_LocalScale.x":
-                    return option.ScaleAllowError;/// fDepth;
+                    return option.ScaleAllowError;      /// fDepth;
 
                 default:
                     return 0f;
