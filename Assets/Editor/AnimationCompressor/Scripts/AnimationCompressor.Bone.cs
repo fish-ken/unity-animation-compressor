@@ -34,7 +34,7 @@ namespace AnimationCompressor
 
         public float Sample(string propertyName, float time)
         {
-            var value = 0f;
+            var value = Curves[propertyName].Evaluate(time);
 
             if (Parent != null)
                 value += Parent.Sample(propertyName, time);
