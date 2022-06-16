@@ -1,4 +1,3 @@
-using System.IO;
 using UnityEditor;
 using UnityEngine;
 
@@ -21,7 +20,6 @@ namespace AnimationCompressor
         {
             EditorUtility.ClearProgressBar();
         }
-
 
         public void Compress(AnimationClip originClip, Option option)
         {
@@ -66,8 +64,8 @@ namespace AnimationCompressor
 
         private void PreCompress()
         {
-            UpdateProgressBar(nameof(GenerateBoneMapPass), 1);
-            GenerateBoneMapPass();
+            UpdateProgressBar(nameof(GenerateOriginalAnimationBoneMap), 1);
+            GenerateOriginalAnimationBoneMap();
         }
 
         private void Compress()
@@ -82,7 +80,7 @@ namespace AnimationCompressor
             if (option.EnableAccurateEndPointNodes)
             {
                 UpdateProgressBar(nameof(CalculateEndPointNode), 4);
-                CalculateEndPointNode();
+                CalculateEndPointNodePass();
             }
         }
     }
