@@ -1,6 +1,5 @@
 using System.IO;
 using UnityEditor;
-using UnityEditor.Experimental;
 using UnityEngine;
 
 namespace AnimationCompressor
@@ -41,11 +40,9 @@ namespace AnimationCompressor
             PreCompress();
             Compress();
 
-            
             AssetDatabase.CreateAsset(compressClip, outputPath);
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
-            //File.Move(outputPath, )
         }
 
         private void PreCompress()
@@ -55,7 +52,11 @@ namespace AnimationCompressor
 
         private void Compress()
         {
-            CompressByKeyframeReductionPass();
+            GenerateKeyFrameByCurveFittingPass();
+            KeyFrameReductionPass();
+
+            if (option.EnableAccurateEndPointNodes)
+                CalculateEndPointNode();
         }
     }
 }

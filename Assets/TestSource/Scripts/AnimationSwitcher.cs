@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class AnimationSwitcher : MonoBehaviour
@@ -46,6 +46,7 @@ public class AnimationSwitcher : MonoBehaviour
         {
             if (i == idx)
             {
+                Debug.Log($"Play {aniState.clip.name}");
                 aniComp.Play(aniState.clip.name);
                 return;
             }

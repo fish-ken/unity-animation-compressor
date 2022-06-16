@@ -5,7 +5,7 @@ namespace AnimationCompressor
 {
     public partial class Core
     {
-        private void CompressByKeyframeReductionPass()
+        private void GenerateKeyFrameByCurveFittingPass()
         {
             var curveBindings = AnimationUtility.GetCurveBindings(originClip);
 
@@ -13,13 +13,14 @@ namespace AnimationCompressor
             {
                 var isTansformCurve = Util.IsTransformKey(curveBinding.propertyName);
                 var originCurve = AnimationUtility.GetEditorCurve(originClip, curveBinding);
-                var compressCurve = AnimationUtility.GetEditorCurve(originClip, curveBinding);
+                var compressCurve = AnimationUtility.GetEditorCurve(originClip, curveBinding);      // copy curve
 
                 // Only working on transform keys
                 if(isTansformCurve)
                 {
-                    compressCurve.keys = null;
-                    CompressByKeyframeReduction(curveBinding, originCurve, compressCurve);
+                    // Clear key, gen key
+                    compressCurve.keys = null;  
+                    GenerateKeyFrameByCurveFitting(curveBinding, originCurve, compressCurve);
                 }
 
                 compressClip.SetCurve(curveBinding.path, curveBinding.type, curveBinding.propertyName, compressCurve);
@@ -27,12 +28,12 @@ namespace AnimationCompressor
         }
 
         /// <summary>
-        /// allow range 보다 큰 지점에 key 추가
+        /// 키프레임 재생성
         /// </summary>
         /// <param name="originCurve"></param>
         /// <param name="compressCurve"></param>
         /// <param name="allowErrorRange"></param>
-        private void CompressByKeyframeReduction(EditorCurveBinding curveBinding, AnimationCurve originCurve, AnimationCurve compressCurve)
+        private void GenerateKeyFrameByCurveFitting(EditorCurveBinding curveBinding, AnimationCurve originCurve, AnimationCurve compressCurve)
         {
             var propertyName = curveBinding.propertyName;
             var path = curveBinding.path;
@@ -43,18 +44,21 @@ namespace AnimationCompressor
             compressCurve.AddKey(originCurve.keys[0]);
             compressCurve.AddKey(originCurve.keys[originCurve.keys.Length - 1]);
 
+            if (originCurve.keys.Length <= 2)
+                return;
+
             var itrCount = 0f;
             while (true)
             {
                 var tick = 0f;
-                var term = 0.01f;
                 var time = originCurve.keys[originCurve.keys.Length - 1].time;
 
                 var highestOffset = -1f;
-                var highestOffsetTick = -1f;
+                Keyframe highestKey = new Keyframe();
 
-                while (tick < time)
+                for (var i = 0; i < originCurve.keys.Length; i++)
                 {
+                    tick = originCurve.keys[i].time;
                     var orgEv = originCurve.Evaluate(tick);
                     var compEv = compressCurve.Evaluate(tick);
                     var offset = Mathf.Abs(orgEv - compEv);
@@ -64,21 +68,15 @@ namespace AnimationCompressor
                         if (offset > highestOffset)
                         {
                             highestOffset = offset;
-                            highestOffsetTick = tick;
+                            highestKey = originCurve.keys[i];
                         }
                     }
-
-                    tick += term;
                 }
 
-                if (highestOffset == -1)
+                if (highestOffset == -1f)
                     break;
 
-                var key = new Keyframe();
-                key.time = highestOffsetTick;
-                key.value = originCurve.Evaluate(highestOffsetTick);
-
-                compressCurve.AddKey(key);
+                compressCurve.AddKey(highestKey);
                 itrCount++;
             }
 
@@ -116,7 +114,7 @@ namespace AnimationCompressor
                 case "m_LocalScale.y":
                 case "m_LocalScale.z":
                 case "m_LocalScale.x":
-                    return option.ScaleAllowError;/// fDepth;
+                    return option.ScaleAllowError;      /// fDepth;
 
                 default:
                     return 0f;
