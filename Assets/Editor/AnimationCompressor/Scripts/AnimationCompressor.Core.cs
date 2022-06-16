@@ -41,12 +41,6 @@ namespace AnimationCompressor
         {
             var outputPath = Util.GetOutputPath(originClip);
 
-            //if (File.Exists(outputPath))
-            //{
-            //    var exist = AssetDatabase.LoadAssetAtPath<AnimationClip>(outputPath);
-            //    EditorUtility.CopySerialized(exist, compressClip);
-            //}
-
             compressClip = AssetDatabase.LoadMainAssetAtPath(outputPath) as AnimationClip;
             var isOutputExist = compressClip != null;
 
