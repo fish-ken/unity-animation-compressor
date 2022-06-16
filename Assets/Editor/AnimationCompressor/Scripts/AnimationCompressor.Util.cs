@@ -88,5 +88,26 @@ namespace AnimationCompressor
                     return false;
             }
         }
+
+        /// <summary>
+        /// Return true, if property is rotation key
+        /// </summary>
+        /// <param name="propertyName"></param>
+        /// <returns></returns>
+        public static bool IsRotaitonKey(string propertyName)
+        {
+            switch (propertyName)
+            {
+                case "m_LocalRotation":
+                case "m_LocalRotation.x":
+                case "m_LocalRotation.y":
+                case "m_LocalRotation.z":
+                case "m_LocalRotation.w":
+                    return true;
+
+                default:
+                    return false;
+            }
+        }
     }
 }

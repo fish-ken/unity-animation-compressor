@@ -47,8 +47,23 @@ namespace AnimationCompressor
                 var curKey = keys[i];
                 var nextKey = keys[i + 1];
 
-                // TODO : 인-아웃 탄젠트/웨이트에 대한 오차값도 검사가 필요한가?
-                var valueOffset = Mathf.Abs(curKey.value - nextKey.value);
+                float valueOffset;
+                if (Util.IsRotaitonKey(propertyName))
+                {
+                    // TODO : 인-아웃 탄젠트/웨이트에 대한 오차값도 검사가 필요한가?
+                    // 쿼터니언에 대한 ValueOffset 검사가 너무 루즈하게 되고 있음
+                    // 로테이션 쪽만 뭔가 다르게 해야할듯
+                    var curOffset = curKey.value * Mathf.Rad2Deg;
+                    var nextOffset = nextKey.value * Mathf.Rad2Deg;
+                    valueOffset = Mathf.Abs(curOffset - nextOffset);
+                    valueOffset = float.MaxValue;
+                }
+                else
+                {
+                    valueOffset = Mathf.Abs(curKey.value - nextKey.value);
+                }
+
+
                 if (valueOffset >= allowErrorRange)
                 {
                     newKeyset.Add(curKey);
