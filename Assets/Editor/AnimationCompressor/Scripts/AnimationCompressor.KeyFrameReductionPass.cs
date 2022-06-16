@@ -32,13 +32,16 @@ namespace AnimationCompressor
         /// <param name="allowErrorRange"></param>
         private void KeyFrameReduction(EditorCurveBinding curveBinding, AnimationCurve compressCurve)
         {
+            var keys = compressCurve.keys;
+            if (keys.Length <= 2)
+                return;
+
             var propertyName = curveBinding.propertyName;
             var path = curveBinding.path;
             var depth = Util.GetDepth(path);
             var allowErrorRange = GetAllowErrorValue(propertyName, depth);
-
-            var keys = compressCurve.keys;
             var newKeyset = new List<Keyframe>();
+
             for (var i = 0; i < keys.Length - 1; i++)
             {
                 var curKey = keys[i];

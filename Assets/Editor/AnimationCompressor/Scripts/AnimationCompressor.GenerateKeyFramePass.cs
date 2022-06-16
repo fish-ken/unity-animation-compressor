@@ -44,11 +44,13 @@ namespace AnimationCompressor
             compressCurve.AddKey(originCurve.keys[0]);
             compressCurve.AddKey(originCurve.keys[originCurve.keys.Length - 1]);
 
+            if (originCurve.keys.Length <= 2)
+                return;
+
             var itrCount = 0f;
             while (true)
             {
                 var tick = 0f;
-                var term = 0.01f;
                 var time = originCurve.keys[originCurve.keys.Length - 1].time;
 
                 var highestOffset = -1f;
@@ -69,16 +71,10 @@ namespace AnimationCompressor
                             highestKey = originCurve.keys[i];
                         }
                     }
-
-                    //tick += term;
                 }
 
                 if (highestOffset == -1f)
                     break;
-
-                //var key = new Keyframe();
-                //key.time = highestOffsetTick;
-                //key.value = originCurve.Evaluate(highestOffsetTick);
 
                 compressCurve.AddKey(highestKey);
                 itrCount++;
