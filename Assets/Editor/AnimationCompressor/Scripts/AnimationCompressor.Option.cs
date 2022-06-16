@@ -22,7 +22,7 @@ namespace AnimationCompressor
         /// <summary>
         /// Improved accuracy for endpoints such as feet and hands
         /// </summary>
-        public bool EnableAccurateEndPointNodes { get; set; } = true;
+        public bool EnableAccurateEndPointNodes { get; set; } = false;
 
         /// <summary>
         /// Endpoint computation tolerance

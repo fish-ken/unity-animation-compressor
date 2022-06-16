@@ -1,4 +1,3 @@
-using System.IO;
 using UnityEditor;
 using UnityEngine;
 
@@ -22,7 +21,6 @@ namespace AnimationCompressor
             EditorUtility.ClearProgressBar();
         }
 
-
         public void Compress(AnimationClip originClip, Option option)
         {
             if (originClip == null)
@@ -41,25 +39,13 @@ namespace AnimationCompressor
         {
             var outputPath = Util.GetOutputPath(originClip);
 
-            //if (File.Exists(outputPath))
-            //{
-            //    var exist = AssetDatabase.LoadAssetAtPath<AnimationClip>(outputPath);
-            //    EditorUtility.CopySerialized(exist, compressClip);
-            //}
-
             compressClip = AssetDatabase.LoadMainAssetAtPath(outputPath) as AnimationClip;
             var isOutputExist = compressClip != null;
 
             if (isOutputExist)
-            {
                 EditorUtility.CopySerialized(originClip, compressClip);
-                //AssetDatabase.SaveAssets();
-            }
             else
-            {
                 compressClip = Object.Instantiate(originClip);
-                //AssetDatabase.CreateAsset(compressClip, outputPath);
-            }
 
             EditorUtility.CopySerialized(originClip, compressClip);
             compressClip.ClearCurves();
@@ -72,15 +58,14 @@ namespace AnimationCompressor
             else
                 AssetDatabase.CreateAsset(compressClip, outputPath);
 
-            //AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
             ClearProgressBar();
         }
 
         private void PreCompress()
         {
-            UpdateProgressBar(nameof(GenerateBoneMapPass), 1);
-            GenerateBoneMapPass();
+            UpdateProgressBar(nameof(GenerateOriginalAnimationBoneMap), 1);
+            GenerateOriginalAnimationBoneMap();
         }
 
         private void Compress()
@@ -88,13 +73,14 @@ namespace AnimationCompressor
             UpdateProgressBar(nameof(GenerateKeyFrameByCurveFittingPass), 2);
             GenerateKeyFrameByCurveFittingPass();
 
-            UpdateProgressBar(nameof(KeyFrameReductionPass), 3);
-            KeyFrameReductionPass();
+            // 집어치자 - 거지같음 ㅇㅇㅇㅇㅇㅇㅇㅇ
+            //UpdateProgressBar(nameof(KeyFrameReductionPass), 3);
+            //KeyFrameReductionPass();
 
             if (option.EnableAccurateEndPointNodes)
             {
                 UpdateProgressBar(nameof(CalculateEndPointNode), 4);
-                CalculateEndPointNode();
+                CalculateEndPointNodePass();
             }
         }
     }
