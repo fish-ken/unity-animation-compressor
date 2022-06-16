@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
@@ -7,21 +8,18 @@ namespace AnimationCompressor
     {
         private void KeyFrameReductionPass()
         {
-            var curveBindings = AnimationUtility.GetCurveBindings(originClip);
+            var curveBindings = AnimationUtility.GetCurveBindings(compressClip);
 
             foreach (var curveBinding in curveBindings)
             {
                 var isTansformCurve = Util.IsTransformKey(curveBinding.propertyName);
-                var originCurve = AnimationUtility.GetEditorCurve(originClip, curveBinding);
-                var compressCurve = AnimationUtility.GetEditorCurve(originClip, curveBinding);
+                var compressCurve = AnimationUtility.GetEditorCurve(compressClip, curveBinding);
 
                 // Only working on transform keys
-                if (isTansformCurve)
-                {
-                    compressCurve.keys = null;
-                    GenerateKeyFrameByCurveFitting(curveBinding, originCurve, compressCurve);
-                }
+                if (isTansformCurve == false)
+                    continue;
 
+                KeyFrameReduction(curveBinding, compressCurve);
                 compressClip.SetCurve(curveBinding.path, curveBinding.type, curveBinding.propertyName, compressCurve);
             }
         }
@@ -32,50 +30,39 @@ namespace AnimationCompressor
         /// <param name="originCurve"></param>
         /// <param name="compressCurve"></param>
         /// <param name="allowErrorRange"></param>
-        private void KeyFrameReduction(EditorCurveBinding curveBinding, AnimationCurve originCurve, AnimationCurve compressCurve)
+        private void KeyFrameReduction(EditorCurveBinding curveBinding, AnimationCurve compressCurve)
         {
             var propertyName = curveBinding.propertyName;
             var path = curveBinding.path;
             var depth = Util.GetDepth(path);
-            var allowErrorRange = KeyFrameReduction_GetAllowErrorValue(propertyName, depth);
+            var allowErrorRange = GetAllowErrorValue(propertyName, depth);
 
-            Debug.Log($"{nameof(AnimationCompressor)} itrCount : {itrCount}");
-        }
-
-        private float KeyFrameReduction_GetAllowErrorValue(string propertyName, int depth = 1)
-        {
-            // Restrict divide by zero
-            depth = Mathf.Max(1, depth);
-
-            var fDepth = (float)depth;
-
-            var revDepth = maxDepth - depth;
-            var multiplier = (float)revDepth;
-
-            switch (propertyName)
+            var keys = compressCurve.keys;
+            var newKeyset = new List<Keyframe>();
+            for (var i = 0; i < keys.Length - 1; i++)
             {
-                case "m_LocalPosition":
-                case "m_LocalPosition.x":
-                case "m_LocalPosition.y":
-                case "m_LocalPosition.z":
-                    return option.PositionAllowError; // fDepth;
+                var curKey = keys[i];
+                var nextKey = keys[i + 1];
 
-                case "m_LocalRotation":
-                case "m_LocalRotation.x":
-                case "m_LocalRotation.y":
-                case "m_LocalRotation.z":
-                case "m_LocalRotation.w":
-                    return option.RotationAllowError; // fDepth;
+                var valueOffset = Mathf.Abs(curKey.value - nextKey.value);
+                if (valueOffset >= allowErrorRange)
+                {
+                    newKeyset.Add(curKey);
 
-                case "m_LocalScale":
-                case "m_LocalScale.y":
-                case "m_LocalScale.z":
-                case "m_LocalScale.x":
-                    return option.ScaleAllowError;      /// fDepth;
-
-                default:
-                    return 0f;
+                    if (i == keys.Length - 1)
+                        newKeyset.Add(nextKey);
+                }
+                else
+                {
+                    var newValue = (curKey.value + nextKey.value) / 2f;
+                    var newTime = (nextKey.time + curKey.time) / 2f;
+                    var newKey = new Keyframe();
+                    newKey.value = newValue;
+                    newKey.time = newTime;
+                }
             }
+
+            compressCurve.keys = newKeyset.ToArray();
         }
     }
 }

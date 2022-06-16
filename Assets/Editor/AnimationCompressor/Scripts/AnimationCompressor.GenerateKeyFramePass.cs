@@ -87,7 +87,7 @@ namespace AnimationCompressor
 
 
 
-        private float GenearteKeyFrame_GetAllowErrorValue(string propertyName, int depth = 1)
+        private float GetAllowErrorValue(string propertyName, int depth = 1)
         {
             // Restrict divide by zero
             depth = Mathf.Max(1, depth);
