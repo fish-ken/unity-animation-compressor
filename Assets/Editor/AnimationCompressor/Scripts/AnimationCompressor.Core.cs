@@ -51,15 +51,10 @@ namespace AnimationCompressor
             var isOutputExist = compressClip != null;
 
             if (isOutputExist)
-            {
                 EditorUtility.CopySerialized(originClip, compressClip);
-                //AssetDatabase.SaveAssets();
-            }
             else
             {
                 compressClip = Object.Instantiate(originClip);
-                //AssetDatabase.CreateAsset(compressClip, outputPath);
-            }
 
             EditorUtility.CopySerialized(originClip, compressClip);
             compressClip.ClearCurves();
@@ -72,7 +67,6 @@ namespace AnimationCompressor
             else
                 AssetDatabase.CreateAsset(compressClip, outputPath);
 
-            //AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
             ClearProgressBar();
         }
