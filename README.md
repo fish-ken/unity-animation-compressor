@@ -20,3 +20,4 @@ Blue - Compressed clip
 Contributions are always welcome.
 Create [Issue](https://github.com/fish-ken/unity-animation-compressor/issues) or [Pull Request](https://github.com/fish-ken/unity-animation-compressor/pulls).
 
+ 
