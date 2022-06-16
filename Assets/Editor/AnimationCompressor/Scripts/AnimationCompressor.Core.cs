@@ -10,6 +10,19 @@ namespace AnimationCompressor
         private AnimationClip originClip = null;
         private AnimationClip compressClip = null;
 
+        private readonly int TotalStep = 4;
+
+        private void UpdateProgressBar(string desc, int step)
+        {
+            EditorUtility.DisplayProgressBar(nameof(AnimationCompressor), desc, (float)step / TotalStep);
+        }
+
+        private void ClearProgressBar()
+        {
+            EditorUtility.ClearProgressBar();
+        }
+
+
         public void Compress(AnimationClip originClip, Option option)
         {
             if (originClip == null)
@@ -61,20 +74,28 @@ namespace AnimationCompressor
 
             //AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
+            ClearProgressBar();
         }
 
         private void PreCompress()
         {
+            UpdateProgressBar(nameof(GenerateBoneMapPass), 1);
             GenerateBoneMapPass();
         }
 
         private void Compress()
         {
+            UpdateProgressBar(nameof(GenerateKeyFrameByCurveFittingPass), 2);
             GenerateKeyFrameByCurveFittingPass();
+
+            UpdateProgressBar(nameof(KeyFrameReductionPass), 3);
             KeyFrameReductionPass();
 
             if (option.EnableAccurateEndPointNodes)
+            {
+                UpdateProgressBar(nameof(CalculateEndPointNode), 4);
                 CalculateEndPointNode();
+            }
         }
     }
 }
