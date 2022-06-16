@@ -47,7 +47,6 @@ namespace AnimationCompressor
             if (isOutputExist)
                 EditorUtility.CopySerialized(originClip, compressClip);
             else
-            {
                 compressClip = Object.Instantiate(originClip);
 
             EditorUtility.CopySerialized(originClip, compressClip);
