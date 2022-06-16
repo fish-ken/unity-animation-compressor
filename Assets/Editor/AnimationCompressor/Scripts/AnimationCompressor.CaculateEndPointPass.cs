@@ -60,7 +60,7 @@ namespace AnimationCompressor
                 var orgSampleValue = originBone.Sample(propertyName, tick);
                 var compSampleValue = compressBone.Sample(propertyName, tick);
 
-                var rawOffset = compSampleValue - orgSampleValue;
+                var rawOffset = orgSampleValue - compSampleValue;
                 var offset = Mathf.Abs(rawOffset);
 
                 if (offset > 0.01)
