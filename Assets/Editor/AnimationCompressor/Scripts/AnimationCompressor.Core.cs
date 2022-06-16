@@ -27,21 +27,39 @@ namespace AnimationCompressor
         private void ProcessCompress()
         {
             var outputPath = Util.GetOutputPath(originClip);
-            compressClip = Object.Instantiate(originClip);
 
-            if (File.Exists(outputPath))
+            //if (File.Exists(outputPath))
+            //{
+            //    var exist = AssetDatabase.LoadAssetAtPath<AnimationClip>(outputPath);
+            //    EditorUtility.CopySerialized(exist, compressClip);
+            //}
+
+            compressClip = AssetDatabase.LoadMainAssetAtPath(outputPath) as AnimationClip;
+            var isOutputExist = compressClip != null;
+
+            if (isOutputExist)
             {
-                var exist = AssetDatabase.LoadAssetAtPath<AnimationClip>(outputPath);
-                EditorUtility.CopySerialized(exist, compressClip);
+                EditorUtility.CopySerialized(originClip, compressClip);
+                //AssetDatabase.SaveAssets();
+            }
+            else
+            {
+                compressClip = Object.Instantiate(originClip);
+                //AssetDatabase.CreateAsset(compressClip, outputPath);
             }
 
+            EditorUtility.CopySerialized(originClip, compressClip);
             compressClip.ClearCurves();
 
             PreCompress();
             Compress();
 
-            AssetDatabase.CreateAsset(compressClip, outputPath);
-            AssetDatabase.SaveAssets();
+            if (isOutputExist)
+                AssetDatabase.SaveAssets();
+            else
+                AssetDatabase.CreateAsset(compressClip, outputPath);
+
+            //AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
         }
 
