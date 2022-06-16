@@ -75,8 +75,9 @@ namespace AnimationCompressor
             UpdateProgressBar(nameof(GenerateKeyFrameByCurveFittingPass), 2);
             GenerateKeyFrameByCurveFittingPass();
 
-            UpdateProgressBar(nameof(KeyFrameReductionPass), 3);
-            KeyFrameReductionPass();
+            // 집어치자 - 거지같음 ㅇㅇㅇㅇㅇㅇㅇㅇ
+            //UpdateProgressBar(nameof(KeyFrameReductionPass), 3);
+            //KeyFrameReductionPass();
 
             if (option.EnableAccurateEndPointNodes)
             {
