@@ -53,7 +53,10 @@ namespace AnimationCompressor
         private void Compress()
         {
             GenerateKeyFrameByCurveFittingPass();
-            CalculateEndPointNode();
+            KeyFrameReductionPass();
+
+            if(option.EnableAccurateEndPointNodes)
+                CalculateEndPointNode();
         }
     }
 }

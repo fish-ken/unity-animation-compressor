@@ -32,7 +32,8 @@ namespace AnimationCompressor
 
         public void OnGUI()
         {
-            EditorGUILayout.TextArea("Allow Error Range");
+            EditorGUILayout.Space();
+            EditorGUILayout.LabelField("Allow Error Range", EditorStyles.boldLabel);
             {
                 EditorGUI.indentLevel++;
 
@@ -43,12 +44,15 @@ namespace AnimationCompressor
                 EditorGUI.indentLevel--;
             }
 
-            EnableAccurateEndPointNodes = EditorGUILayout.Toggle(nameof(EnableAccurateEndPointNodes), EnableAccurateEndPointNodes);
-            if(EnableAccurateEndPointNodes)
+            EditorGUILayout.Space();
+            EditorGUILayout.LabelField("Accurate End Point Nodes", EditorStyles.boldLabel);
             {
                 EditorGUI.indentLevel++;
-
-                EndPointNodesRange = EditorGUILayout.IntField(nameof(EndPointNodesRange), EndPointNodesRange);
+                EnableAccurateEndPointNodes = EditorGUILayout.Toggle("Enable", EnableAccurateEndPointNodes);
+                if (EnableAccurateEndPointNodes)
+                {
+                    EndPointNodesRange = EditorGUILayout.IntField(nameof(EndPointNodesRange), EndPointNodesRange);
+                }
 
                 EditorGUI.indentLevel--;
             }

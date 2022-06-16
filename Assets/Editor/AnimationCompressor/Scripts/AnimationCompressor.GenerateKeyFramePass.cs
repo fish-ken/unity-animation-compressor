@@ -13,12 +13,13 @@ namespace AnimationCompressor
             {
                 var isTansformCurve = Util.IsTransformKey(curveBinding.propertyName);
                 var originCurve = AnimationUtility.GetEditorCurve(originClip, curveBinding);
-                var compressCurve = AnimationUtility.GetEditorCurve(originClip, curveBinding);
+                var compressCurve = AnimationUtility.GetEditorCurve(originClip, curveBinding);      // copy curve
 
                 // Only working on transform keys
                 if(isTansformCurve)
                 {
-                    compressCurve.keys = null;
+                    // Clear key, gen key
+                    compressCurve.keys = null;  
                     GenerateKeyFrameByCurveFitting(curveBinding, originCurve, compressCurve);
                 }
 
@@ -51,10 +52,11 @@ namespace AnimationCompressor
                 var time = originCurve.keys[originCurve.keys.Length - 1].time;
 
                 var highestOffset = -1f;
-                var highestOffsetTick = -1f;
+                Keyframe highestKey = new Keyframe();
 
-                while (tick < time)
+                for (var i = 0; i < originCurve.keys.Length; i++)
                 {
+                    tick = originCurve.keys[i].time;
                     var orgEv = originCurve.Evaluate(tick);
                     var compEv = compressCurve.Evaluate(tick);
                     var offset = Mathf.Abs(orgEv - compEv);
@@ -64,21 +66,21 @@ namespace AnimationCompressor
                         if (offset > highestOffset)
                         {
                             highestOffset = offset;
-                            highestOffsetTick = tick;
+                            highestKey = originCurve.keys[i];
                         }
                     }
 
-                    tick += term;
+                    //tick += term;
                 }
 
-                if (highestOffset == -1)
+                if (highestOffset == -1f)
                     break;
 
-                var key = new Keyframe();
-                key.time = highestOffsetTick;
-                key.value = originCurve.Evaluate(highestOffsetTick);
+                //var key = new Keyframe();
+                //key.time = highestOffsetTick;
+                //key.value = originCurve.Evaluate(highestOffsetTick);
 
-                compressCurve.AddKey(key);
+                compressCurve.AddKey(highestKey);
                 itrCount++;
             }
 

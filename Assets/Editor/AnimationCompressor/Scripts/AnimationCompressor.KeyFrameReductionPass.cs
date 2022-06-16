@@ -44,6 +44,7 @@ namespace AnimationCompressor
                 var curKey = keys[i];
                 var nextKey = keys[i + 1];
 
+                // TODO : 인-아웃 탄젠트/웨이트에 대한 오차값도 검사가 필요한가?
                 var valueOffset = Mathf.Abs(curKey.value - nextKey.value);
                 if (valueOffset >= allowErrorRange)
                 {
@@ -57,8 +58,18 @@ namespace AnimationCompressor
                     var newValue = (curKey.value + nextKey.value) / 2f;
                     var newTime = (nextKey.time + curKey.time) / 2f;
                     var newKey = new Keyframe();
+
+                    // Value, Time
                     newKey.value = newValue;
                     newKey.time = newTime;
+                    
+                    // In
+                    newKey.inTangent = curKey.inTangent;
+                    newKey.inWeight = curKey.inWeight;
+
+                    // Out
+                    newKey.outTangent = nextKey.outTangent;
+                    newKey.outWeight = nextKey.outWeight;
                 }
             }
 
