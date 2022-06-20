@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
@@ -42,12 +40,11 @@ namespace AnimationCompressor
 
             if (depth < startEndPointDepth)
                 return;
-            else if(originBoneMap == null || originBoneMap.ContainsKey(path) == false)
+            else if (originBoneMap == null || originBoneMap.ContainsKey(path) == false)
                 return;
             else if (compressBoneMap == null || compressBoneMap.ContainsKey(path) == false)
                 return;
 
-            var keys = compressCurve.keys;
             var propertyName = curveBinding.propertyName;
             var originBone = originBoneMap[path];
             var compressBone = compressBoneMap[path];
@@ -55,7 +52,7 @@ namespace AnimationCompressor
             var tick = 0f;
             var time = compressClip.length;
             var term = compressClip.frameRate / 60f;
-            while(tick <= time)
+            while (tick <= time)
             {
                 var orgSampleValue = originBone.Sample(propertyName, tick);
                 var compSampleValue = compressBone.Sample(propertyName, tick);
@@ -65,7 +62,7 @@ namespace AnimationCompressor
 
                 if (offset > 0.01)
                 {
-                    // Psyche 
+                    // Psyche
                     var newKey = new Keyframe();
                     newKey.value = compSampleValue + rawOffset;
                     newKey.time = tick;
@@ -75,23 +72,6 @@ namespace AnimationCompressor
 
                 tick += term;
             }
-
-            //for (var i = 0; i < keys.Length; i++)
-            //{
-            //    var time = keys[i].time;
-            //    var orgSampleValue = originBone.Sample(propertyName, time);
-            //    var compSampleValue = compressBone.Sample(propertyName, time);
-
-            //    var rawOffset = compSampleValue - orgSampleValue;
-            //    var offset = Mathf.Abs(rawOffset);
-
-            //    if (offset < 0.01)
-            //        continue;
-
-            //    keys[i].value += rawOffset;
-            //}
         }
-
     }
 }
-

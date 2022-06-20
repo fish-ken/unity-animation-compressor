@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
@@ -12,7 +12,7 @@ namespace AnimationCompressor
             var clips = new List<AnimationClip>();
             var selections = Selection.objects;
 
-            foreach(var selection in selections)
+            foreach (var selection in selections)
             {
                 if (selection is AnimationClip == false)
                     continue;
@@ -23,11 +23,11 @@ namespace AnimationCompressor
 
             if (clips.Count <= 0)
                 return;
-            
+
             var core = new Core();
             var option = new Option();
 
-            foreach(var clip in clips)
+            foreach (var clip in clips)
                 core.Compress(clip, option);
         }
 

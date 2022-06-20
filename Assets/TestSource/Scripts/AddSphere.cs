@@ -1,5 +1,3 @@
-﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class AddSphere : MonoBehaviour
@@ -11,7 +9,7 @@ public class AddSphere : MonoBehaviour
         if (sphere == null)
             return;
 
-        foreach(var tr in GetComponentsInChildren<Transform>())
+        foreach (var tr in GetComponentsInChildren<Transform>())
         {
             var copy = Instantiate(sphere, tr);
         }

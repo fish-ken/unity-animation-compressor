@@ -63,7 +63,6 @@ namespace AnimationCompressor
                     valueOffset = Mathf.Abs(curKey.value - nextKey.value);
                 }
 
-
                 if (valueOffset >= allowErrorRange)
                 {
                     newKeyset.Add(curKey);
@@ -80,7 +79,7 @@ namespace AnimationCompressor
                     // Value, Time
                     newKey.value = newValue;
                     newKey.time = newTime;
-                    
+
                     // In
                     newKey.inTangent = curKey.inTangent;
                     newKey.inWeight = curKey.inWeight;

@@ -16,10 +16,10 @@ namespace AnimationCompressor
                 var compressCurve = AnimationUtility.GetEditorCurve(originClip, curveBinding);      // copy curve
 
                 // Only working on transform keys
-                if(isTansformCurve)
+                if (isTansformCurve)
                 {
                     // Clear key, gen key
-                    compressCurve.keys = null;  
+                    compressCurve.keys = null;
                     GenerateKeyFrameByCurveFitting(curveBinding, originCurve, compressCurve);
                 }
 
@@ -82,8 +82,6 @@ namespace AnimationCompressor
 
             Debug.Log($"{nameof(AnimationCompressor)} itrCount : {itrCount}");
         }
-
-
 
         private float GetAllowErrorValue(string propertyName, int depth = 1)
         {
