@@ -8,7 +8,7 @@ Red - Original clip
 Blue - Compressed clip
 
 ## Quickstart
-1. Import [AnimationCompressor.unitypackage](https://github.com/fish-ken/unity-animation-compressor)
+1. Import [AnimationCompressor.unitypackage](https://github.com/fish-ken/unity-animation-compressor/releases)
 1. Click menu in Tools/Optimization/Animation/Animation Compressor/Open
 1. Insert your animation clip copy in Target AnimationClip  
 1. Adjust some options  
