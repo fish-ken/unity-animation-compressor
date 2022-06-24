@@ -1,5 +1,5 @@
 # unity-animation-compresesor
-Unity animation clip compressor
+Unity skeletal animation compressor
 
 
 ## Result
