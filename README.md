@@ -4,8 +4,8 @@ Unity skeletal animation compressor
 
 ## Result
 ![cap01](ReadmeAssets/Sample_0.gif)  
-Red - Original clip  
-Blue - Compressed clip
+Red - Original clip (12054KB)  
+Blue - Compressed clip (2568KB)  
 
 ## Quickstart
 1. Import [AnimationCompressor.unitypackage](https://github.com/fish-ken/unity-animation-compressor/releases)
